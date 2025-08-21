@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PumpTrenchCards</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body class="bg-[#0f0f0f] text-white min-h-screen">
+  <div id="root"></div>
+
+  <script type="text/javascript">
+    const { useState } = React;
+
+    function Field({ label, value, onChange, placeholder }) {
+      return (
+        React.createElement("label", { className: "block text-sm" },
+          React.createElement("span", { className: "mb-1 block text-white/80" }, label),
+          React.createElement("input", {
+            value,
+            onChange: e => onChange(e.target.value),
+            placeholder,
+            className: "w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-white outline-none placeholder-white/40 focus:border-white/40 focus:bg-white/10"
+          })
+        )
+      );
+    }
+
+    function Stat({ label, value }) {
+      return (
+        React.createElement("div", { className: "flex flex-col items-start rounded-lg bg-white/5 px-3 py-2 text-xs border border-white/20" },
+          React.createElement("span", { className: "text-white/70" }, label),
+          React.createElement("span", { className: "mt-0.5 text-sm font-bold text-white" }, value)
+        )
+      );
+    }
+
+    function App() {
+      const [displayName, setDisplayName] = useState("");
+      const [handle, setHandle] = useState("");
+      const [tagline, setTagline] = useState("");
+      const [bestGain, setBestGain] = useState("");
+      const [coinsTraded, setCoinsTraded] = useState("");
+      const [winRate, setWinRate] = useState("");
+      const [peakPnl, setPeakPnl] = useState("");
+      const [followers, setFollowers] = useState("");
+      const [risk, setRisk] = useState("");
+      const [favoriteCoin, setFavoriteCoin] = useState("");
+      const [badge, setBadge] = useState("user");
+
+      const THEMES = {
+        pumpfun: {
+          name: "PumpFun • Green/White",
+          accent: "#2ecc71",
+          bgCss: "linear-gradient(135deg, #ffffff 0%, #2ecc71 55%, #1a1a1a 100%)",
+          titleColor: "#2ecc71",
+        },
+        pastel: {
+          name: "Pastel • Blue/Pink",
+          accent: "#6fa8dc",
+          bgCss: "linear-gradient(135deg, #f8bbd0 0%, #6fa8dc 60%, #283593 100%)",
+          titleColor: "#6fa8dc",
+        },
+        gold: {
+          name: "Gold • Black",
+          accent: "#f1c40f",
+          bgCss: "linear-gradient(135deg, #f9e79f 0%, #f1c40f 55%, #1a1a1a 100%)",
+          titleColor: "#f1c40f",
+        },
+      };
+      const [themeKey, setThemeKey] = useState("pumpfun");
+      const theme = THEMES[themeKey];
+
+      const [image, setImage] = useState(null);
+      const [imgName, setImgName] = useState("");
+      const [imgErr, setImgErr] = useState("");
+      const [showCard, setShowCard] = useState(false);
+      const [saving, setSaving] = useState(false);
+
+      const onPortraitFile = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setImgErr("");
+        if (!file.type.startsWith("image/")) {
+          setImgErr("Please upload a PNG/JPG/WebP image.");
+          return;
+        }
+        setImgName(file.name);
+        const reader = new FileReader();
+        reader.onload = () => {
+          setImage(reader.result);
+          setShowCard(true);
+        };
+        reader.readAsDataURL(file);
+      };
+
+      const saveCard = async () => {
+        if (saving) return;
+        try {
+          setSaving(true);
+          const node = document.getElementById("card");
+          if (!node) throw new Error("Card not ready");
+          await new Promise(r => requestAnimationFrame(r));
+          const canvas = await html2canvas(node, { backgroundColor: null, scale: 2 });
+          const link = document.createElement("a");
+          link.download = "pumptrenchcard.png";
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        } catch (err) {
+          alert("Could not save card: " + err.message);
+        } finally {
+          setSaving(false);
+        }
+      };
+
+      return (
+        React.createElement("div", { className: "mx-auto max-w-6xl p-4" },
+          React.createElement("h1", {
+            className: "text-5xl font-extrabold text-center drop-shadow-lg mb-6",
+            style: { color: theme.titleColor }
+          }, "pumptrenchcards"),
+
+          React.createElement("div", { className: "grid md:grid-cols-2 gap-6" },
+            // Left: form
+            React.createElement("div", { className: "bg-black/40 rounded-xl p-4" },
+              React.createElement(Field, { label: "Display Name", value: displayName, onChange: setDisplayName, placeholder: "e.g. TrenchLord" }),
+              React.createElement(Field, { label: "Handle", value: handle, onChange: setHandle, placeholder: "e.g. @trencher" }),
+              React.createElement(Field, { label: "Tagline", value: tagline, onChange: setTagline, placeholder: "e.g. All gas, no stop-loss" }),
+              React.createElement("div", { className: "grid grid-cols-2 gap-2 mt-2" },
+                React.createElement(Field, { label: "Best Gain (×)", value: bestGain, onChange: setBestGain, placeholder: "12" }),
+                React.createElement(Field, { label: "Coins Traded", value: coinsTraded, onChange: setCoinsTraded, placeholder: "58" }),
+                React.createElement(Field, { label: "Win Rate %", value: winRate, onChange: setWinRate, placeholder: "43" }),
+                React.createElement(Field, { label: "Peak PnL (SOL)", value: peakPnl, onChange: setPeakPnl, placeholder: "128" }),
+                React.createElement(Field, { label: "Followers", value: followers, onChange: setFollowers, placeholder: "3200" }),
+                React.createElement(Field, { label: "Risk", value: risk, onChange: setRisk, placeholder: "DeGen" }),
+                React.createElement(Field, { label: "Favorite Coin", value: favoriteCoin, onChange: setFavoriteCoin, placeholder: "$PUMP" }),
+                React.createElement(Field, { label: "Badge", value: badge, onChange: setBadge, placeholder: "degen" }),
+              ),
+              React.createElement("div", { className: "mt-2" },
+                React.createElement("label", { className: "text-sm text-white/80" }, "Themes"),
+                React.createElement("div", { className: "flex gap-2 mt-1" },
+                  Object.entries(THEMES).map(([k,v]) =>
+                    React.createElement("button", {
+                      key:k,
+                      onClick: () => setThemeKey(k),
+                      className: `px-3 py-1 rounded ${themeKey===k ? "bg-white/20" : "bg-white/5 hover:bg-white/10"}`,
+                      style:{ color:v.accent }
+                    }, v.name)
+                  )
+                )
+              ),
+              React.createElement("input", { type:"file", accept:"image/*", onChange:onPortraitFile, className:"mt-3 text-sm" }),
+
+              React.createElement("div", { className:"flex gap-2 mt-3" },
+                React.createElement("button", { onClick:()=>setShowCard(true), className:"bg-green-500 text-black px-3 py-1 rounded" }, "Generate"),
+                React.createElement("button", { onClick:saveCard, disabled:!showCard, className:"bg-white/20 px-3 py-1 rounded" }, saving?"Saving…":"Save PNG"),
+              )
+            ),
+            // Right: card preview
+            React.createElement("div", { className:"flex justify-center" },
+              showCard ? React.createElement("div", { id:"card", className:"aspect-[2/3] w-[300px] rounded-xl border-4 border-black p-3 flex flex-col", style:{ background: theme.bgCss }},
+                React.createElement("div", { className:"flex justify-between items-center" },
+                  React.createElement("div", { style:{color:theme.titleColor}, className:"font-extrabold" }, "pumptrenchcards"),
+                  React.createElement("div", { className:"text-xs font-bold bg-black/40 px-1 rounded" }, "PF")
+                ),
+                React.createElement("div", { className:"mt-2 flex-1 flex flex-col" },
+                  React.createElement("div", { className:"flex-1 bg-black/30 rounded overflow-hidden flex items-center justify-center" },
+                    image ? React.createElement("img", { src:image, className:"w-full h-full object-cover" }) : "Upload portrait"
+                  ),
+                  React.createElement("div", { className:"mt-2" },
+                    React.createElement("div", { className:"font-bold" }, displayName||"Anon Trader"),
+                    React.createElement("div", { className:"text-xs text-white/70" }, handle),
+                    tagline && React.createElement("div", { className:"italic text-xs text-white/70" }, `“${tagline}”`)
+                  ),
+                  React.createElement("div", { className:"grid grid-cols-2 gap-1 mt-2" },
+                    React.createElement(Stat, { label:"Best Gain", value: bestGain?bestGain+"x":"--" }),
+                    React.createElement(Stat, { label:"Coins", value: coinsTraded||"--" }),
+                    React.createElement(Stat, { label:"Win Rate", value: winRate?winRate+"%":"--" }),
+                    React.createElement(Stat, { label:"Peak PnL", value: peakPnl?peakPnl+" SOL":"--" }),
+                    React.createElement(Stat, { label:"Followers", value: followers||"--" }),
+                    React.createElement(Stat, { label:"Fav Coin", value: favoriteCoin||"--" }),
+                  ),
+                  React.createElement("div", { className:"mt-2 text-[10px] flex justify-between" },
+                    React.createElement("span", { className:"font-semibold text-black" }, "pumptrenchcards.xyz"),
+                    React.createElement("span", null, "Risk: ", risk||"--")
+                  )
+                )
+              ) : React.createElement("div", { className:"text-xs text-white/60" }, "Fill in fields, then Generate.")
+            )
+          )
+        )
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+  </script>
+</body>
+</html>
